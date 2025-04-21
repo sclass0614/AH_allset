@@ -7,339 +7,93 @@
     <title>우리집 데이케어 센터 통합 관리 시스템</title>
     <!-- Font Awesome 라이브러리 추가 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <style>
-        /* 기본 마진과 패딩 초기화 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "맑은 고딕", "Malgun Gothic", sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            /* 모바일 터치 하이라이트 제거 */
-            -webkit-touch-callout: none;
-            /* 모바일 롱터치 메뉴 제거 */
-        }
-
-        /*******************************************
-       * 1. 변수 및 기본 설정
-       *******************************************/
-        /* 변수 정의 */
-        :root {
-            --main-color: #235135;
-            /* 진한 초록색 */
-            --light-color: #e9f2ef;
-            /* 연한 민트색 */
-            --accent-color: #5a8f7b;
-            /* 중간 초록색 */
-            --border-color: #cccccc;
-            /* 회색 */
-            --button-color: #ededed;
-            /* 연한 회색 */
-            --header-height: 4rem;
-            /* 헤더 높이 */
-            --footer-height: 3rem;
-            /* 푸터 높이 */
-        }
-
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
-            /* 전체 페이지 스크롤 방지 */
-        }
-
-        body {
-            position: relative;
-            background-color: #f5f5f5;
-            font-size: 1rem;
-            -webkit-text-size-adjust: 100%;
-            /* iOS 텍스트 자동 확대 방지 */
-            -moz-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 배경 이미지 */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://i.ibb.co/HTQksZ7k/3.png');
-            background-size: 30%;
-            /* 이미지 크기 */
-            background-position: center;
-            background-repeat: no-repeat;
-            /* 반복 없음 */
-            opacity: 0.2;
-            /* 투명도 */
-            z-index: -1;
-        }
-
-        input,
-        select,
-        textarea {
-            font-size: 1rem;
-            /* 모바일에서 자동 확대 방지 */
-        }
-
-        /*******************************************
-       * 2. 레이아웃 컴포넌트
-       *******************************************/
-        /* 메인 컨테이너 스타일 */
-        .container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 헤더 영역 스타일 */
-        .header {
-            height: var(--header-height);
-            background-color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 0.0625rem solid var(--border-color);
-            padding: 0 1rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-        }
-
-        .title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--main-color);
-        }
-
-        /* 네비게이션 컨테이너 */
-        .nav-container {
-            flex: 1;
-            overflow-y: auto;
-            /* 내비게이션 영역만 스크롤 */
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        /* 카테고리 섹션 */
-        .category-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        /* 카테고리 제목 */
-        .category-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--main-color);
-            padding-bottom: 0.5rem;
-            border-bottom: 0.125rem solid var(--main-color);
-        }
-
-        /* 버튼 그리드 */
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
-            gap: 1rem;
-        }
-
-        /* 네비게이션 버튼 */
-        .nav-button {
-            background-color: var(--light-color);
-            border: 0.0625rem solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 1rem 0.75rem;
-            text-align: center;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--main-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 5rem;
-            text-decoration: none;
-        }
-
-        .nav-button:hover {
-            background-color: var(--accent-color);
-            color: white;
-            transform: translateY(-0.3125rem);
-            box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
-        }
-
-        /* 아이콘 스타일 */
-        .nav-button i {
-            font-size: 1.5rem;
-            margin-bottom: 0.3rem;
-        }
-
-        /* 푸터 */
-        .footer {
-            height: var(--footer-height);
-            background-color: white;
-            text-align: center;
-            padding: 0.5rem 0;
-            font-size: 0.9rem;
-            color: #666;
-            border-top: 0.0625rem solid var(--border-color);
-            z-index: 10;
-        }
-
-        /* 로딩 화면 */
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loading-spinner {
-            border: 0.5rem solid #f3f3f3;
-            border-top: 0.5rem solid var(--main-color);
-            border-radius: 50%;
-            width: 3rem;
-            height: 3rem;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /*******************************************
-       * 3. 모달 및 오버레이 컴포넌트
-       *******************************************/
-
-        /* 모달 스타일 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-container {
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
-            width: 25rem;
-            max-width: 90%;
-            animation: modalFadeIn 0.3s;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-1.25rem);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 1rem;
-            background-color: var(--light-color);
-            color: var(--main-color);
-            border-radius: 0.5rem 0.5rem 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            font-size: 1.5rem;
-            line-height: 1;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-            color: #333;
-            font-size: 1rem;
-        }
-
-        .modal-footer {
-            padding: 1rem;
-            text-align: right;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .modal-btn {
-            padding: 0.5rem 1.5rem;
-            background-color: var(--main-color);
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .modal-btn:hover {
-            background-color: var(--accent-color);
-        }
-
-        /* 반응형 */
-        @media screen and (max-width: 768px) {
-            .button-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-button {
-                height: 5rem;
-                padding: 0.75rem 0.5rem;
-            }
-
-            .title {
-                font-size: 1.5rem;
-            }
-
-            .header {
-                height: 3.5rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    
     <!-- Supabase 클라이언트 스크립트 추가 -->
     <script src="supabase.js"></script>
+    
+    <!-- 인증 관련 스크립트 -->
+    <script type="module">
+        import { checkSession, login, logout } from './auth-module.js';
+        
+        // 전역 변수에 인증 함수 추가하여 일반 스크립트에서 접근 가능하게 함
+        window.auth = { login, logout };
+        
+        // 전역 알림 함수 정의
+        window.showAlert = function(message) {
+            const modal = document.getElementById('customModal');
+            const messageEl = document.getElementById('modalMessage');
+            messageEl.textContent = message;
+            
+            // 로딩 화면이 표시되어 있으면 먼저 숨깁니다
+            document.getElementById('loading').style.display = 'none';
+            
+            // 알림 모달 표시
+            modal.style.display = 'flex';
+        };
+        
+        // 페이지 로드 시 세션 확인
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // 로딩 화면 표시
+                document.getElementById('loading').style.display = 'flex';
+                
+                // 세션 확인
+                const { session, error } = await checkSession();
+                
+                if (session) {
+                    // 이미 로그인된 경우
+                    console.log('로그인된 사용자:', session.user.email);
+                    document.getElementById('loginBtn').textContent = '로그아웃';
+                    document.getElementById('loginBtn').setAttribute('data-logged-in', 'true');
+                    
+                    // 사용자 정보 표시
+                    updateUserInfo(session.user.email);
+                    
+                    // 데이터 로드
+                    await window.loadNavigationData();
+                } else {
+                    // 로그인되지 않은 경우
+                    document.getElementById('nav-container').style.display = 'none';
+                    document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
+                    
+                    // 0.5초 후 로그인 모달 표시
+                    setTimeout(() => {
+                        document.getElementById('loginModal').style.display = 'flex';
+                        document.getElementById('employeeId').focus();
+                    }, 500);
+                }
+            } catch (err) {
+                console.error('초기화 오류:', err);
+                showAlert('시스템 초기화 중 오류가 발생했습니다.');
+            } finally {
+                // 로딩 화면 숨기기
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- 사용자 섹션 스타일 -->
+    <style>
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            color: var(--main-color);
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info i {
+            margin-right: 0.5rem;
+            color: var(--accent-color);
+        }
+    </style>
 </head>
 
 <body>
@@ -350,6 +104,10 @@
     <div class="container">
         <div class="header">
             <div class="title">우리집 데이케어센터 통합관리시스템</div>
+            <div class="user-section">
+                <span id="userInfo" class="user-info">로그인이 필요합니다</span>
+                <button id="loginBtn" class="login-header-btn">로그인</button>
+            </div>
         </div>
 
         <div id="nav-container" class="nav-container">
@@ -357,11 +115,11 @@
         </div>
 
         <div class="footer">
-            © 2025 우리집 데이케어 센터. 모든 권리 보유.
+            © 2025 우리집 데이케어 센터. All rights reserved.
         </div>
     </div>
 
-    <!-- 모달 컴포넌트 -->
+    <!-- 알림 모달 컴포넌트 -->
     <div class="modal-overlay" id="customModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -377,10 +135,37 @@
         </div>
     </div>
 
+    <!-- 로그인 모달 컴포넌트 -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="login-modal-container">
+            <div class="login-modal-header">
+                <div class="login-modal-title">로그인</div>
+                <div class="login-modal-subtitle">우리집 데이케어센터 통합관리시스템</div>
+                <div class="login-modal-close" id="loginModalClose">&times;</div>
+            </div>
+            <div class="login-modal-form">
+                <div class="form-group">
+                    <label for="employeeId">직원번호</label>
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="employeeId" placeholder="직원번호를 입력하세요" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="비밀번호를 입력하세요">
+                </div>
+                <button type="button" class="login-btn" id="submitLoginBtn">로그인</button>
+            </div>
+            <div class="login-modal-footer">
+                로그인 문제가 있으시면 관리자에게 문의하세요
+            </div>
+        </div>
+    </div>
+
     <script>
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', function () {
-            // 모달 이벤트 설정
+            // 알림 모달 이벤트 설정
             const modal = document.getElementById('customModal');
             const closeBtn = modal.querySelector('.modal-close');
             const confirmBtn = document.getElementById('modalConfirmBtn');
@@ -402,26 +187,124 @@
                 }
             });
 
-            // 수파베이스에서 네비게이션 데이터 로드
-            loadNavigationData();
+            // 로그인 모달 관련 설정
+            const loginBtn = document.getElementById('loginBtn');
+            const loginModal = document.getElementById('loginModal');
+            const loginModalClose = document.getElementById('loginModalClose');
+            const submitLoginBtn = document.getElementById('submitLoginBtn');
+            const employeeIdInput = document.getElementById('employeeId');
+            const passwordInput = document.getElementById('password');
+
+            // 닫기 버튼(X) 클릭 시 모달 닫기
+            loginModalClose.addEventListener('click', function() {
+                loginModal.style.display = 'none';
+            });
+
+            // ESC 키 누를 때 모달 닫기
+            window.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && loginModal.style.display === 'flex') {
+                    loginModal.style.display = 'none';
+                }
+            });
+
+            // 모달 바깥 영역 클릭 시 닫기
+            window.addEventListener('click', function(event) {
+                if (event.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+            });
+
+            // 로그인/로그아웃 버튼 클릭 이벤트
+            loginBtn.addEventListener('click', async function() {
+                // 로그인 상태에 따라 다른 동작
+                if (loginBtn.getAttribute('data-logged-in') === 'true') {
+                    // 로그아웃
+                    document.getElementById('loading').style.display = 'flex';
+                    
+                    const { error } = await window.auth.logout();
+                    
+                    if (error) {
+                        window.showAlert('로그아웃 중 오류가 발생했습니다.');
+                        return;
+                    }
+                    
+                    // UI 업데이트
+                    loginBtn.textContent = '로그인';
+                    loginBtn.removeAttribute('data-logged-in');
+                    
+                    // 사용자 정보 초기화
+                    document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
+                    
+                    // 네비게이션 컨테이너 숨기기
+                    document.getElementById('nav-container').style.display = 'none';
+                    
+                    // 로그인 모달 표시
+                    loginModal.style.display = 'flex';
+                    employeeIdInput.focus();
+                    
+                    window.showAlert('로그아웃되었습니다.');
+                } else {
+                    // 로그인 모달 표시
+                    loginModal.style.display = 'flex';
+                    employeeIdInput.focus();
+                }
+            });
+
+            // 로그인 버튼 클릭 처리
+            submitLoginBtn.addEventListener('click', async function() {
+                // 로딩 표시
+                document.getElementById('loading').style.display = 'flex';
+                
+                const employeeId = employeeIdInput.value.trim();
+                const password = passwordInput.value;
+                
+                try {
+                    const { user, error } = await window.auth.login(employeeId, password);
+                    
+                    // 로그인 실패 시에는 즉시 알림 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
+                    if (error) {
+                        window.showAlert(error.message || '로그인에 실패했습니다.');
+                        return;
+                    }
+                    
+                    // 로그인 성공 처리
+                    loginModal.style.display = 'none';
+                    loginBtn.textContent = '로그아웃';
+                    loginBtn.setAttribute('data-logged-in', 'true');
+                    
+                    // 사용자 정보 업데이트
+                    updateUserInfo(user.email);
+                    
+                    // 네비게이션 컨테이너 표시
+                    document.getElementById('nav-container').style.display = 'flex';
+                    
+                    // 데이터 로드
+                    await window.loadNavigationData();
+                    
+                    // 로딩이 완료되면 성공 메시지 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
+                    window.showAlert('로그인에 성공했습니다!');
+                    
+                    // 입력 필드 초기화
+                    employeeIdInput.value = '';
+                    passwordInput.value = '';
+                } catch (err) {
+                    console.error('로그인 처리 오류:', err);
+                    // 오류 발생 시 알림 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
+                    window.showAlert('로그인 중 오류가 발생했습니다.');
+                }
+            });
+
+            // 엔터 키 입력 시 로그인 처리
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    window.auth.login();
+                }
+            });
         });
 
-        // 커스텀 알림 표시 함수
-        function showAlert(message) {
-            const modal = document.getElementById('customModal');
-            const messageEl = document.getElementById('modalMessage');
-
-            messageEl.textContent = message;
-            modal.style.display = 'flex';
-        }
-
-        // 수파베이스에서 데이터 로드
-        async function loadNavigationData() {
+        // 수파베이스에서 데이터 로드 (전역으로 노출)
+        window.loadNavigationData = async function() {
             try {
-                // 스키마 정보 먼저 조회 (디버깅용)
-                console.log('스키마 정보 조회 시도...');
-                await supabase.getSchemaInfo();
-                
                 const result = await supabase.getNavigationData();
                 
                 if (!result.success) {
@@ -429,12 +312,11 @@
                 }
                 
                 // 수파베이스에서 가져온 데이터를 직접 사용
-                console.log('가져온 데이터:', result.data);
                 renderNavigationFromRawData(result.data);
             } catch (error) {
                 handleError(error.message);
             }
-        }
+        };
 
         // 원본 수파베이스 데이터를 사용하는 렌더링 함수
         function renderNavigationFromRawData(data) {
@@ -489,15 +371,33 @@
                         navButton.href = 'javascript:void(0)';
                         navButton.addEventListener('click', function (e) {
                             e.preventDefault();
-                            showAlert('해당 메뉴는 현재 준비 중입니다.');
+                            window.showAlert('해당 메뉴는 현재 준비 중입니다.');
                         });
                     } else {
-                        // URL이 http:// 또는 https://로 시작하지 않으면 https://를 추가
-                        if (!url.match(/^https?:\/\//i)) {
-                            url = 'https://' + url;
+                        // URL이 null이 아닌 경우에만 처리
+                        if (url) {
+                            // URL이 http:// 또는 https://로 시작하지 않으면 https:// 추가
+                            if (!url.match(/^https?:\/\//i)) {
+                                url = 'https://' + url;
+                            }
+
+                            //"from=index" 쿼리 추가
+                            if (url.includes('?')) {
+                                url += '&from=index';
+                            } else {
+                                url += '?from=index';
+                            }
+                            
+                            navButton.href = url;
+                            navButton.target = "_blank"; // 새 탭에서 열기
+                        } else {
+                            // URL이 null인 경우 기본값 설정
+                            navButton.href = 'javascript:void(0)';
+                            navButton.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                window.showAlert('링크 정보가 없습니다.');
+                            });
                         }
-                        navButton.href = url;
-                        navButton.target = "_blank"; // 새 탭에서 열기
                     }
 
                     navButton.className = 'nav-button';
@@ -527,7 +427,16 @@
         function handleError(error) {
             console.error('오류 발생:', error);
             document.getElementById('loading').style.display = 'none';
-            showAlert('메뉴를 불러오는 중 오류가 발생했습니다: ' + error);
+            window.showAlert('메뉴를 불러오는 중 오류가 발생했습니다: ' + error);
+        }
+
+        // 로그인된 사용자 정보 업데이트
+        function updateUserInfo(email) {
+            // 이메일에서 직원번호 추출 (example@example.com에서 example 부분)
+            const employeeId = email.split('@')[0];
+            // 첫 글자를 대문자로 변환하여 표시
+            const displayId = employeeId.charAt(0).toUpperCase() + employeeId.slice(1);
+            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-check"></i>${displayId} 님`;
         }
     </script>
 </body>
