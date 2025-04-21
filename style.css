@@ -1,1 +1,461 @@
+/* 기본 마진과 패딩 초기화 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "맑은 고딕", "Malgun Gothic", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    /* 모바일 터치 하이라이트 제거 */
+    -webkit-touch-callout: none;
+    /* 모바일 롱터치 메뉴 제거 */
+}
 
+/*******************************************
+       * 1. 변수 및 기본 설정
+       *******************************************/
+/* 변수 정의 */
+:root {
+    --main-color: #235135;
+    /* 진한 초록색 */
+    --light-color: #e9f2ef;
+    /* 연한 민트색 */
+    --accent-color: #5a8f7b;
+    /* 중간 초록색 */
+    --border-color: #cccccc;
+    /* 회색 */
+    --button-color: #ededed;
+    /* 연한 회색 */
+    --header-height: 4rem;
+    /* 헤더 높이 */
+    --footer-height: 3rem;
+    /* 푸터 높이 */
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    /* 전체 페이지 스크롤 방지 */
+}
+
+body {
+    position: relative;
+    background-color: #f5f5f5;
+    font-size: 1rem;
+    -webkit-text-size-adjust: 100%;
+    /* iOS 텍스트 자동 확대 방지 */
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 배경 이미지 */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://i.ibb.co/HTQksZ7k/3.png');
+    background-size: 30%;
+    /* 이미지 크기 */
+    background-position: center;
+    background-repeat: no-repeat;
+    /* 반복 없음 */
+    opacity: 0.2;
+    /* 투명도 */
+    z-index: -1;
+}
+
+input,
+select,
+textarea {
+    font-size: 1rem;
+    /* 모바일에서 자동 확대 방지 */
+}
+
+/*******************************************
+       * 2. 레이아웃 컴포넌트
+       *******************************************/
+/* 메인 컨테이너 스타일 */
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* 헤더 영역 스타일 */
+.header {
+    height: var(--header-height);
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 0.0625rem solid var(--border-color);
+    padding: 0 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--main-color);
+}
+
+/* 네비게이션 컨테이너 */
+.nav-container {
+    flex: 1;
+    overflow-y: auto;
+    /* 내비게이션 영역만 스크롤 */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* 카테고리 섹션 */
+.category-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* 카테고리 제목 */
+.category-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--main-color);
+    padding-bottom: 0.5rem;
+    border-bottom: 0.125rem solid var(--main-color);
+}
+
+/* 버튼 그리드 */
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+    gap: 1rem;
+}
+
+/* 네비게이션 버튼 */
+.nav-button {
+    background-color: var(--light-color);
+    border: 0.0625rem solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--main-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+    text-decoration: none;
+}
+
+.nav-button:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
+}
+
+/* 아이콘 스타일 */
+.nav-button i {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+}
+
+/* 푸터 */
+.footer {
+    height: var(--footer-height);
+    background-color: white;
+    text-align: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #666;
+    border-top: 0.0625rem solid var(--border-color);
+    z-index: 10;
+}
+
+/* 로딩 화면 */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    border: 0.5rem solid #f3f3f3;
+    border-top: 0.5rem solid var(--main-color);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/*******************************************
+       * 3. 모달 및 오버레이 컴포넌트
+       *******************************************/
+
+/* 모달 스타일 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+    width: 25rem;
+    max-width: 90%;
+    animation: modalFadeIn 0.3s;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-1.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 1rem;
+    background-color: var(--light-color);
+    color: var(--main-color);
+    border-radius: 0.5rem 0.5rem 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    color: #333;
+    font-size: 1rem;
+}
+
+.modal-footer {
+    padding: 1rem;
+    text-align: right;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-btn {
+    padding: 0.5rem 1.5rem;
+    background-color: var(--main-color);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.modal-btn:hover {
+    background-color: var(--accent-color);
+}
+
+/* 로그인 모달 스타일 */
+.login-modal-container {
+    width: 20rem;
+    max-width: 90%;
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modalFadeIn 0.4s ease;
+}
+
+.login-modal-header {
+    background: linear-gradient(135deg, var(--main-color), var(--accent-color));
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.login-modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.login-modal-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.login-modal-form {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(90, 143, 123, 0.2);
+    outline: none;
+}
+
+.form-group i {
+    position: absolute;
+    left: 0.75rem;
+    top: 2.35rem;
+    font-size: 1rem;
+    color: #aaa;
+}
+
+.login-btn {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, var(--main-color), var(--accent-color));
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1.5rem;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, var(--accent-color), var(--main-color));
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-modal-footer {
+    padding: 1rem;
+    text-align: center;
+    background-color: var(--light-color);
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.login-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.login-modal-close:hover {
+    opacity: 1;
+}
+
+/* 로그인 버튼 스타일 */
+.login-header-btn {
+    padding: 0.4rem 1rem;
+    background-color: var(--light-color);
+    color: var(--main-color);
+    border: 1px solid var(--main-color);
+    border-radius: 0.3rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.login-header-btn:hover {
+    background-color: var(--main-color);
+    color: white;
+}
+
+/* 반응형 */
+@media screen and (max-width: 768px) {
+    .button-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-button {
+        height: 5rem;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .header {
+        height: 3.5rem;
+    }
+}
