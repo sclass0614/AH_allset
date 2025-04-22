@@ -69,24 +69,30 @@ export async function login(employeeId, password) {
         // 직원번호 형식 정규화 (대소문자 구분 없이 처리)
         let normalizedEmployeeId = employeeId.trim();
         
-        // 정규식으로 형식 확인 (S 또는 s로 시작하고 숫자 5자리)
-        // ^ : 문자열 시작
-        // [sS] : 소문자 s 또는 대문자 S
-        // \d{5} : 숫자 5개
-        // $ : 문자열 끝
-        const employeeIdPattern = /^[sS]\d{5}$/;
+        // admin 계정 확인
+        const isAdmin = normalizedEmployeeId.toLowerCase() === 'admin';
         
-        // 형식이 맞지 않으면 오류 발생
-        if (!employeeIdPattern.test(normalizedEmployeeId)) {
-            throw new Error('직원번호는 S로 시작하는 5자리 형식이어야 합니다 (예: S12345)');
+        // 관리자가 아닌 경우에만 형식 검사
+        if (!isAdmin) {
+            // 정규식으로 형식 확인 (S 또는 s로 시작하고 숫자 5자리)
+            // ^ : 문자열 시작
+            // [sS] : 소문자 s 또는 대문자 S
+            // \d{5} : 숫자 5개
+            // $ : 문자열 끝
+            const employeeIdPattern = /^[sS]\d{5}$/;
+            
+            // 형식이 맞지 않으면 오류 발생
+            if (!employeeIdPattern.test(normalizedEmployeeId)) {
+                throw new Error('직원번호는 S로 시작하는 5자리 형식이어야 합니다 (예: S12345)');
+            }
+            
+            // 첫 글자를 소문자 s로 통일 (대소문자 구분 없이 인식)
+            normalizedEmployeeId = 's' + normalizedEmployeeId.substring(1);
         }
-        
-        // 첫 글자를 소문자 s로 통일 (대소문자 구분 없이 인식)
-        normalizedEmployeeId = 's' + normalizedEmployeeId.substring(1);
         
         // 직원번호를 이메일 형식으로 변환 (Supabase Auth 요구사항)
         // Supabase 인증은 이메일과 비밀번호 방식을 사용하므로 변환 필요
-        const email = `${normalizedEmployeeId}@example.com`;
+        const email = `${normalizedEmployeeId.toLowerCase()}@example.com`;
         
         // Supabase 로그인 시도
         // signInWithPassword: 이메일과 비밀번호로 로그인 시도

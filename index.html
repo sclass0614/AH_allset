@@ -448,6 +448,13 @@
         function updateUserInfo(email) {
             // 이메일에서 직원번호 추출 (example@example.com에서 example 부분)
             const employeeId = email.split('@')[0];
+            
+            // admin 계정인 경우 표시방식 변경
+            if (employeeId.toLowerCase() === 'admin') {
+                document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-shield"></i>관리자 님`;
+                return;
+            }
+            
             // 첫 글자를 대문자로 변환하여 표시
             const displayId = employeeId.charAt(0).toUpperCase() + employeeId.slice(1);
             document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-check"></i>${displayId} 님`;
