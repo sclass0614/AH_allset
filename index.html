@@ -349,11 +349,27 @@
             
             // 카테고리 순서로 정렬
             const sortedCategories = Object.entries(categories).sort((a, b) => {
-                return a[1].order - b[1].order;
+                // 카테고리순서가 문자열이므로 문자열 비교로 정렬
+                return a[1].order.localeCompare(b[1].order);
             });
 
             // 각 카테고리별 섹션 생성
             sortedCategories.forEach(([categoryName, categoryData]) => {
+                // 카테고리 내 아이템들을 정렬
+                categoryData.items.sort((a, b) => {
+                    // 아이템순서 필드 확인 (여러 가능한 필드명 확인)
+                    const aOrder = a.아이템순서 || a.메뉴순서 || a.카테고리순서;
+                    const bOrder = b.아이템순서 || b.메뉴순서 || b.카테고리순서;
+                    
+                    // 순서 필드가 있으면 문자열 비교로 정렬
+                    if (aOrder && bOrder) {
+                        return aOrder.localeCompare(bOrder);
+                    }
+                    
+                    // 순서 필드가 없으면 업무구분으로 정렬
+                    return a.업무구분.localeCompare(b.업무구분);
+                });
+                
                 // 카테고리 섹션 생성
                 const categorySection = document.createElement('div');
                 categorySection.className = 'category-section';
