@@ -11,17 +11,170 @@ const TABLE_NAMES = [
     // "allsetingtable" // 일반적인 오타 버전
 ];
 
+// employees_approach 테이블의 가능한 이름들
+const EMPLOYEE_APPROACH_TABLE_NAMES = [
+    "employees_approach",
+    "employees_approach_table",
+    "employeesApproach",
+    "EmployeesApproach",
+    "employee_approach",
+    "employee_approach_table"
+];
+
 // 헤더 생성 유틸리티 함수
-function createHeaders() {
-    return {
+function createHeaders(accessToken = null) {
+    const headers = {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
+        'apikey': SUPABASE_KEY
     };
+    
+    // 인증된 사용자의 토큰이 있으면 사용, 없으면 익명 키 사용
+    if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+    } else {
+        headers['Authorization'] = `Bearer ${SUPABASE_KEY}`;
+    }
+    
+    return headers;
 }
 
-// 네비게이션 데이터 가져오기
-async function getNavigationData() {
+// 직원 접근 권한 정보 가져오기
+async function getEmployeeApproach(employeeId, accessToken = null) {
+    try {
+        console.log(`=== 직원 접근 정보 조회 시작 ===`);
+        console.log(`입력된 직원번호: ${employeeId}`);
+        console.log(`액세스 토큰: ${accessToken ? '있음' : '없음'}`);
+        
+        // 직원번호를 소문자로 정규화 (CSV 데이터와 일치시키기 위해)
+        const normalizedEmployeeId = employeeId.toLowerCase();
+        console.log(`정규화된 직원번호: ${normalizedEmployeeId}`);
+        
+        // 먼저 스키마 정보 확인
+        console.log(`\n=== 스키마 정보 확인 ===`);
+        const schemaResponse = await fetch(`${SUPABASE_URL}/rest/v1/?apikey=${SUPABASE_KEY}`, {
+            method: 'GET',
+            headers: createHeaders(accessToken)
+        });
+        
+        if (schemaResponse.ok) {
+            const schemaData = await schemaResponse.json();
+            console.log('사용 가능한 테이블들:', Object.keys(schemaData));
+        } else {
+            console.log('스키마 정보 조회 실패:', schemaResponse.status);
+        }
+        
+        // API URL 확인
+        const apiUrl = `${SUPABASE_URL}/rest/v1/employees_approach?select=*`;
+        console.log(`API URL: ${apiUrl}`);
+        
+        // 헤더 확인
+        const headers = createHeaders(accessToken);
+        console.log(`요청 헤더:`, headers);
+        
+        // 먼저 전체 데이터를 조회해서 디버깅
+        console.log(`\n=== 전체 데이터 조회 시작 ===`);
+        
+        // 여러 가능한 테이블 이름 시도
+        let allData = [];
+        let workingTableName = null;
+        
+        for (const tableName of EMPLOYEE_APPROACH_TABLE_NAMES) {
+            console.log(`\n--- ${tableName} 테이블 시도 ---`);
+            const testApiUrl = `${SUPABASE_URL}/rest/v1/${tableName}?select=*`;
+            console.log(`테스트 API URL: ${testApiUrl}`);
+            
+            try {
+                const testResponse = await fetch(testApiUrl, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                console.log(`${tableName} 응답 상태:`, testResponse.status);
+                
+                if (testResponse.ok) {
+                    const testData = await testResponse.json();
+                    console.log(`${tableName} 데이터 개수:`, testData.length);
+                    
+                    if (testData.length > 0) {
+                        console.log(`${tableName} 첫 번째 레코드:`, testData[0]);
+                        allData = testData;
+                        workingTableName = tableName;
+                        console.log(`✅ ${tableName} 테이블에서 데이터 발견!`);
+                        break;
+                    }
+                } else {
+                    console.log(`${tableName} 조회 실패:`, testResponse.status, testResponse.statusText);
+                }
+            } catch (error) {
+                console.log(`${tableName} 오류:`, error.message);
+            }
+        }
+        
+        if (workingTableName) {
+            console.log(`\n=== ${workingTableName} 테이블 사용 ===`);
+            console.log('전체 데이터 개수:', allData.length);
+            
+            // 데이터 구조 확인
+            if (allData.length > 0) {
+                console.log('첫 번째 레코드 구조:', allData[0]);
+                console.log('첫 번째 레코드의 직원번호:', allData[0].직원번호);
+                console.log('직원번호 타입:', typeof allData[0].직원번호);
+            }
+        } else {
+            console.log('\n❌ 모든 테이블에서 데이터를 찾을 수 없습니다.');
+        }
+        
+        // employees_approach 테이블에서 해당 직원번호의 정보 조회
+        console.log(`\n=== 특정 직원번호 조회 시작 ===`);
+        const specificApiUrl = `${SUPABASE_URL}/rest/v1/employees_approach?직원번호=eq.${normalizedEmployeeId}&select=*`;
+        console.log(`특정 직원번호 조회 API URL: ${specificApiUrl}`);
+        
+        const response = await fetch(specificApiUrl, {
+            method: 'GET',
+            headers: headers
+        });
+        
+        console.log(`특정 직원번호 조회 응답 상태:`, response.status);
+        console.log(`특정 직원번호 조회 응답 상태 텍스트:`, response.statusText);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`특정 직원번호 조회 결과:`, data);
+            console.log(`조회된 레코드 개수:`, data.length);
+            
+            if (data && data.length > 0) {
+                console.log(`=== 조회 성공 ===`);
+                console.log(`매칭된 레코드들:`, data);
+                return {
+                    success: true,
+                    data: data // 모든 매칭되는 레코드 반환 (한 직원이 여러 권한을 가질 수 있음)
+                };
+            } else {
+                console.log(`=== 조회 실패: 매칭되는 레코드 없음 ===`);
+                console.log(`검색한 직원번호: ${normalizedEmployeeId}`);
+                console.log(`전체 데이터에서 직원번호 목록:`, allData.map(item => item.직원번호));
+                return {
+                    success: false,
+                    error: '해당 직원번호에 대한 접근 권한 정보를 찾을 수 없습니다.'
+                };
+            }
+        } else {
+            console.log(`=== API 호출 실패 ===`);
+            const errorText = await response.text();
+            console.log('에러 응답 내용:', errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('직원 접근 정보 조회 오류:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// 네비게이션 데이터 가져오기 (직원 정보 기반으로 필터링)
+async function getNavigationData(employeeInfo = null) {
     let lastError = null;
     
     // 각 테이블 이름 시도
@@ -36,8 +189,19 @@ async function getNavigationData() {
             console.log(`'${tableName}' 응답 상태:`, response.status);
             
             if (response.ok) {
-                const data = await response.json();
+                let data = await response.json();
                 console.log(`'${tableName}' 데이터 가져오기 성공!`);
+                
+                // 직원 정보가 제공된 경우 필터링 적용 (임시로 비활성화)
+                if (employeeInfo) {
+                    console.log('직원 정보 기반 필터링 적용:', employeeInfo);
+                    console.log('원본 데이터 개수:', data.length);
+                    
+                    // 임시로 필터링을 비활성화하여 모든 데이터 표시
+                    console.log('임시로 모든 데이터 표시 (employees_approach 테이블에 데이터가 없음)');
+                    console.log('필터링된 데이터:', data);
+                }
+                
                 return {
                     success: true,
                     data: data
@@ -92,5 +256,6 @@ async function getSchemaInfo() {
 // 수파베이스 모듈 - 함수들을 객체로 노출
 const supabase = {
     getNavigationData,
+    getEmployeeApproach,
     getSchemaInfo
 }; 
