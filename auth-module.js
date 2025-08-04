@@ -25,6 +25,9 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // 이 클라이언트를 통해 인증 관련 API 호출
 const authClient = createClient(supabaseUrl, supabaseKey);
 
+// 전역으로 노출하여 다른 모듈에서 접근 가능하게 함
+window.authClient = authClient;
+
 /**
  * 현재 로그인된 세션을 확인하는 함수
  * 
