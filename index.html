@@ -50,8 +50,11 @@
                     // 사용자 정보 표시
                     updateUserInfo(session.user.email);
                     
-                    // 데이터 로드
-                    await window.loadNavigationData();
+                    // 직원번호 추출하여 데이터 로드
+                    const employeeId = extractEmployeeId(session.user.email);
+                    // admin 계정인 경우 직원번호를 null로 전달하여 모든 데이터 로드
+                    const targetEmployeeId = employeeId.toLowerCase() === 'admin' ? null : employeeId;
+                    await window.loadNavigationData(targetEmployeeId);
                 } else {
                     // 로그인되지 않은 경우
                     document.getElementById('nav-container').style.display = 'none';
@@ -276,8 +279,11 @@
                     // 네비게이션 컨테이너 표시
                     document.getElementById('nav-container').style.display = 'flex';
                     
-                    // 데이터 로드
-                    await window.loadNavigationData();
+                    // 직원번호 추출하여 데이터 로드
+                    const extractedEmployeeId = extractEmployeeId(user.email);
+                    // admin 계정인 경우 직원번호를 null로 전달하여 모든 데이터 로드
+                    const targetEmployeeId = extractedEmployeeId.toLowerCase() === 'admin' ? null : extractedEmployeeId;
+                    await window.loadNavigationData(targetEmployeeId);
                     
                     // 로딩이 완료되면 성공 메시지 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
                     window.showAlert('로그인에 성공했습니다!');
@@ -301,23 +307,52 @@
         });
 
         // 수파베이스에서 데이터 로드 (전역으로 노출)
-        window.loadNavigationData = async function() {
+        window.loadNavigationData = async function(employeeId = null) {
             try {
-                const result = await supabase.getNavigationData();
+                let employeeInfo = null;
+                
+                // 직원번호가 제공된 경우 employees_approach 테이블에서 직원 정보 조회
+                if (employeeId) {
+                    console.log('직원 정보 조회 시작:', employeeId);
+                    
+                    // 현재 로그인된 사용자의 액세스 토큰 가져오기
+                    let accessToken = null;
+                    try {
+                        const { data: { session } } = await window.authClient?.auth.getSession();
+                        if (session) {
+                            accessToken = session.access_token;
+                            console.log('액세스 토큰 획득:', accessToken ? '성공' : '실패');
+                        }
+                    } catch (error) {
+                        console.log('액세스 토큰 획득 실패:', error);
+                    }
+                    
+                    const employeeResult = await supabase.getEmployeeApproach(employeeId, accessToken);
+                    
+                    if (!employeeResult.success) {
+                        throw new Error(employeeResult.error);
+                    }
+                    
+                    employeeInfo = employeeResult.data;
+                    console.log('조회된 직원 정보:', employeeInfo);
+                }
+                
+                // 직원 정보를 기반으로 네비게이션 데이터 조회
+                const result = await supabase.getNavigationData(employeeInfo);
                 
                 if (!result.success) {
                     throw new Error(result.error);
                 }
                 
                 // 수파베이스에서 가져온 데이터를 직접 사용
-                renderNavigationFromRawData(result.data);
+                renderNavigationFromRawData(result.data, employeeInfo);
             } catch (error) {
                 handleError(error.message);
             }
         };
 
         // 원본 수파베이스 데이터를 사용하는 렌더링 함수
-        function renderNavigationFromRawData(data) {
+        function renderNavigationFromRawData(data, employeeInfo = null) {
             const navContainer = document.getElementById('nav-container');
             navContainer.innerHTML = ''; // 기존 내용 초기화
 
@@ -326,17 +361,18 @@
             // userInfo에 "관리자"가 포함되어 있는 경우 admin 계정으로 판단
             const isAdmin = userInfo.includes('관리자');
             
-            console.log("현재 로그인 상태:", { userInfo, isAdmin });
+            console.log("현재 로그인 상태:", { userInfo, isAdmin, employeeInfo });
             
             // 카테고리별로 데이터 분류
             const categories = {};
             
             // 먼저 카테고리 분류
             data.forEach(item => {
-                // 관리자 전용 카테고리 필터링 - 이 부분 제거
-                // if (!isAdmin && item.카테고리.includes("(관리자)")) {
-                //    return; // 관리자가 아니면 이 항목 건너뛰기
-                // }
+                // 직원 정보가 있는 경우 필터링 적용 (임시로 비활성화)
+                if (employeeInfo && !isAdmin) {
+                    // 임시로 필터링을 비활성화하여 모든 데이터 표시
+                    console.log('임시로 모든 메뉴 표시 (employees_approach 테이블에 데이터가 없음)');
+                }
                 
                 if (!categories[item.카테고리]) {
                     categories[item.카테고리] = {
@@ -386,6 +422,12 @@
 
                 // 각 메뉴 항목 생성
                 categoryData.items.forEach(item => {
+                    // 직원 정보가 있는 경우 추가 필터링 적용 (임시로 비활성화)
+                    if (employeeInfo && !isAdmin) {
+                        // 임시로 필터링을 비활성화하여 모든 메뉴 표시
+                        console.log('임시로 모든 메뉴 표시 (employees_approach 테이블에 데이터가 없음)');
+                    }
+                    
                     // 관리자 전용 메뉴 항목 필터링
                     if (!isAdmin && item.업무구분.includes("(관리자)")) {
                         console.log("관리자 메뉴 필터링됨:", item.업무구분);
@@ -462,10 +504,15 @@
             window.showAlert('메뉴를 불러오는 중 오류가 발생했습니다: ' + error);
         }
 
+        // 이메일에서 직원번호 추출하는 함수
+        function extractEmployeeId(email) {
+            return email.split('@')[0];
+        }
+        
         // 로그인된 사용자 정보 업데이트
         function updateUserInfo(email) {
             // 이메일에서 직원번호 추출 (example@example.com에서 example 부분)
-            const employeeId = email.split('@')[0];
+            const employeeId = extractEmployeeId(email);
             
             // admin 계정인 경우 표시방식 변경
             if (employeeId.toLowerCase() === 'admin') {
