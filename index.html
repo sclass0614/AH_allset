@@ -512,14 +512,10 @@
 
                     navButton.className = 'nav-button';
 
-                    // 아이콘 생성
-                    const icon = document.createElement('i');
-                    icon.className = item.아이콘;
-                    navButton.appendChild(icon);
-
-                    // 메뉴 이름 생성
+                    // 메뉴 이름 생성 (커스텀 밑줄 스타일)
                     const span = document.createElement('span');
                     span.textContent = item.업무구분;
+                    span.className = 'nav-text';
                     navButton.appendChild(span);
 
                     buttonGrid.appendChild(navButton);

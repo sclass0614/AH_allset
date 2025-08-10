@@ -144,35 +144,54 @@ textarea {
 
 /* 네비게이션 버튼 */
 .nav-button {
-    background-color: var(--light-color);
+    background: linear-gradient(135deg, #f0f8f5, #e9f2ef);
     border: 0.0625rem solid var(--border-color);
     border-radius: 0.5rem;
-    padding: 1rem 0.75rem;
+    padding: 0.75rem 1rem;
     text-align: center;
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: bold;
     color: var(--main-color);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 5rem;
+    height: 3rem;
     text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .nav-button:hover {
-    background-color: var(--accent-color);
+    background: linear-gradient(135deg, var(--accent-color), var(--main-color));
     color: white;
     transform: translateY(-0.3125rem);
-    box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0.3125rem 0.9375rem rgba(0, 0, 0, 0.15);
 }
 
-/* 아이콘 스타일 */
-.nav-button i {
-    font-size: 1.5rem;
-    margin-bottom: 0.3rem;
+/* 네비게이션 텍스트 스타일 - 예쁜 커스텀 밑줄 */
+.nav-text {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-text::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    border-radius: 1px;
+}
+
+/* 호버 시 밑줄 애니메이션 */
+.nav-button:hover .nav-text::after {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+    height: 3px;
+    transition: all 0.2s ease;
 }
 
 /* 푸터 */
@@ -447,8 +466,9 @@ textarea {
     }
 
     .nav-button {
-        height: 5rem;
-        padding: 0.75rem 0.5rem;
+        height: 2.5rem;
+        padding: 0.5rem;
+        font-size: 0.9rem;
     }
 
     .title {
