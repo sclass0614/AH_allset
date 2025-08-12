@@ -5,61 +5,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>우리집 데이케어 센터 통합 관리 시스템</title>
-    <!-- Font Awesome 라이브러리 추가 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="style.css">
     
-    <!-- Supabase 클라이언트 스크립트 추가 -->
     <script src="supabase.js"></script>
     
-    <!-- 인증 관련 스크립트 -->
     <script type="module">
         import { checkSession, login, logout } from './auth-module.js';
         
-        // 전역 변수에 인증 함수 추가하여 일반 스크립트에서 접근 가능하게 함
         window.auth = { login, logout };
         
-        // 전역 알림 함수 정의
         window.showAlert = function(message) {
             const modal = document.getElementById('customModal');
             const messageEl = document.getElementById('modalMessage');
             messageEl.textContent = message;
             
-            // 로딩 화면이 표시되어 있으면 먼저 숨깁니다
             document.getElementById('loading').style.display = 'none';
             
-            // 알림 모달 표시
             modal.style.display = 'flex';
         };
         
-        // 페이지 로드 시 세션 확인
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // 로딩 화면 표시
                 document.getElementById('loading').style.display = 'flex';
                 
-                // 세션 확인
                 const { session, error } = await checkSession();
                 
                 if (session) {
-                    // 이미 로그인된 경우
                     console.log('로그인된 사용자:', session.user.email);
                     document.getElementById('loginBtn').textContent = '로그아웃';
                     document.getElementById('loginBtn').setAttribute('data-logged-in', 'true');
                     
-                    // 사용자 정보 표시
                     updateUserInfo(session.user.email);
                     
-                    // 직원번호 추출하여 데이터 로드
                     const employeeId = extractEmployeeId(session.user.email);
-                    // 모든 계정이 employees_approach 테이블에서 권한을 확인하도록 직원번호 전달
                     await window.loadNavigationData(employeeId);
                 } else {
-                    // 로그인되지 않은 경우
                     document.getElementById('nav-container').style.display = 'none';
                     document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
                     
-                    // 0.5초 후 로그인 모달 표시
                     setTimeout(() => {
                         document.getElementById('loginModal').style.display = 'flex';
                         document.getElementById('employeeId').focus();
@@ -69,13 +53,11 @@
                 console.error('초기화 오류:', err);
                 showAlert('시스템 초기화 중 오류가 발생했습니다.');
             } finally {
-                // 로딩 화면 숨기기
                 document.getElementById('loading').style.display = 'none';
             }
         });
     </script>
 
-    <!-- 사용자 섹션 스타일 -->
     <style>
         .user-section {
             display: flex;
@@ -113,7 +95,6 @@
         </div>
 
         <div id="nav-container" class="nav-container">
-            <!-- 여기에 동적으로 네비게이션 메뉴가 생성됩니다 -->
         </div>
 
         <div class="footer">
@@ -121,7 +102,6 @@
         </div>
     </div>
 
-    <!-- 알림 모달 컴포넌트 -->
     <div class="modal-overlay" id="customModal" style="z-index: 1100;">
         <div class="modal-container">
             <div class="modal-header">
@@ -129,7 +109,6 @@
                 <div class="modal-close">&times;</div>
             </div>
             <div class="modal-body" id="modalMessage">
-                <!-- 메시지 내용이 여기에 들어갑니다 -->
             </div>
             <div class="modal-footer">
                 <button class="modal-btn" id="modalConfirmBtn">확인</button>
@@ -137,7 +116,6 @@
         </div>
     </div>
 
-    <!-- 로그인 모달 컴포넌트 -->
     <div class="modal-overlay" id="loginModal" style="z-index: 1000;">
         <div class="login-modal-container">
             <div class="login-modal-header">
@@ -165,31 +143,25 @@
     </div>
 
     <script>
-        // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', function () {
-            // 알림 모달 이벤트 설정
             const modal = document.getElementById('customModal');
             const closeBtn = modal.querySelector('.modal-close');
             const confirmBtn = document.getElementById('modalConfirmBtn');
 
-            // 닫기 버튼 클릭 이벤트
             closeBtn.addEventListener('click', function () {
                 modal.style.display = 'none';
             });
 
-            // 확인 버튼 클릭 이벤트
             confirmBtn.addEventListener('click', function () {
                 modal.style.display = 'none';
             });
 
-            // 모달 바깥 영역 클릭 시 닫기
             window.addEventListener('click', function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
                 }
             });
 
-            // 로그인 모달 관련 설정
             const loginBtn = document.getElementById('loginBtn');
             const loginModal = document.getElementById('loginModal');
             const loginModalClose = document.getElementById('loginModalClose');
@@ -197,23 +169,18 @@
             const employeeIdInput = document.getElementById('employeeId');
             const passwordInput = document.getElementById('password');
 
-            // 닫기 버튼(X) 클릭 시 모달 닫기
             loginModalClose.addEventListener('click', function() {
                 loginModal.style.display = 'none';
             });
 
-            // ESC 키 누를 때 모달 닫기
             window.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape' && loginModal.style.display === 'flex') {
                     loginModal.style.display = 'none';
                 }
             });
 
-            // 로그인/로그아웃 버튼 클릭 이벤트
             loginBtn.addEventListener('click', async function() {
-                // 로그인 상태에 따라 다른 동작
                 if (loginBtn.getAttribute('data-logged-in') === 'true') {
-                    // 로그아웃
                     document.getElementById('loading').style.display = 'flex';
                     
                     const { error } = await window.auth.logout();
@@ -223,33 +190,26 @@
                         return;
                     }
                     
-                    // UI 업데이트
                     loginBtn.textContent = '로그인';
                     loginBtn.removeAttribute('data-logged-in');
                     
-                    // 사용자 정보 초기화
                     document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
                     
-                    // 네비게이션 컨테이너 숨기기 및 직원 정보 초기화
                     document.getElementById('nav-container').style.display = 'none';
-                    document.getElementById('nav-container').innerHTML = ''; // 네비게이션 내용 완전 초기화
+                    document.getElementById('nav-container').innerHTML = '';
                     
-                    // 로그인 모달 표시
                     loginModal.style.display = 'flex';
                     employeeIdInput.focus();
                     
                     console.log('로그아웃 시 직원 정보 및 네비게이션 초기화 완료');
                     window.showAlert('로그아웃되었습니다.');
                 } else {
-                    // 로그인 모달 표시
                     loginModal.style.display = 'flex';
                     employeeIdInput.focus();
                 }
             });
 
-            // 로그인 버튼 클릭 처리
             submitLoginBtn.addEventListener('click', async function() {
-                // 로딩 표시
                 document.getElementById('loading').style.display = 'flex';
                 
                 const employeeId = employeeIdInput.value.trim();
@@ -258,9 +218,7 @@
                 try {
                     const { user, error } = await window.auth.login(employeeId, password);
                     
-                    // 로그인 실패 시에는 즉시 알림 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
                     if (error) {
-                        // 에러 메시지가 "Invalid login credentials"인 경우 한국어 메시지로 변경
                         let errorMessage = error.message || '로그인에 실패했습니다.';
                         if (errorMessage === 'Invalid login credentials') {
                             errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
@@ -269,36 +227,27 @@
                         return;
                     }
                     
-                    // 로그인 성공 처리
                     loginModal.style.display = 'none';
                     loginBtn.textContent = '로그아웃';
                     loginBtn.setAttribute('data-logged-in', 'true');
                     
-                    // 사용자 정보 업데이트
                     updateUserInfo(user.email);
                     
-                    // 네비게이션 컨테이너 표시
                     document.getElementById('nav-container').style.display = 'flex';
                     
-                    // 직원번호 추출하여 데이터 로드
                     const extractedEmployeeId = extractEmployeeId(user.email);
-                    // 모든 계정이 employees_approach 테이블에서 권한을 확인하도록 직원번호 전달
                     await window.loadNavigationData(extractedEmployeeId);
                     
-                    // 로딩이 완료되면 성공 메시지 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
                     window.showAlert('로그인에 성공했습니다!');
                     
-                    // 입력 필드 초기화
                     employeeIdInput.value = '';
                     passwordInput.value = '';
                 } catch (err) {
                     console.error('로그인 처리 오류:', err);
-                    // 오류 발생 시 알림 표시 (로딩은 showAlert 함수에서 숨김 처리됨)
                     window.showAlert('로그인 중 오류가 발생했습니다.');
                 }
             });
 
-            // 엔터 키 입력 시 로그인 처리
             passwordInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     window.auth.login();
@@ -306,18 +255,14 @@
             });
         });
 
-        // 수파베이스에서 데이터 로드 (전역으로 노출)
         window.loadNavigationData = async function(employeeId = null) {
             try {
-                // 직원 정보 초기화 (새로운 로그인 시 이전 정보 제거)
                 let employeeInfo = null;
                 
-                // 직원번호가 제공된 경우 employees_approach 테이블에서 직원 정보 조회
                 if (employeeId) {
                     console.log('직원 정보 조회 시작:', employeeId);
                     console.log('이전 직원 정보 초기화됨');
                     
-                    // 현재 로그인된 사용자의 액세스 토큰 가져오기
                     let accessToken = null;
                     try {
                         const { data: { session } } = await window.authClient?.auth.getSession();
@@ -341,52 +286,40 @@
                     console.log('직원번호가 제공되지 않음 - 직원 정보 없음');
                 }
                 
-                // 직원 정보를 기반으로 네비게이션 데이터 조회
                 const result = await supabase.getNavigationData(employeeInfo);
                 
                 if (!result.success) {
                     throw new Error(result.error);
                 }
                 
-                // 수파베이스에서 가져온 데이터를 직접 사용
                 renderNavigationFromRawData(result.data, employeeInfo);
             } catch (error) {
                 handleError(error.message);
             }
         };
 
-        // 원본 수파베이스 데이터를 사용하는 렌더링 함수
         function renderNavigationFromRawData(data, employeeInfo = null) {
             const navContainer = document.getElementById('nav-container');
-            navContainer.innerHTML = ''; // 기존 내용 초기화
+            navContainer.innerHTML = '';
 
-            // 현재 로그인한 사용자의 직원번호 확인 (이메일에서 추출)
             const userInfo = document.getElementById('userInfo').textContent;
-            // 모든 계정이 employees_approach 테이블의 권한에 따라 필터링됨
-            const isAdmin = false; // admin 계정도 권한 기반 필터링 적용
-            const isPublic = false; // public 계정도 권한 기반 필터링 적용
+            const isAdmin = false;
+            const isPublic = false;
             
             console.log("현재 로그인 상태:", { userInfo, isAdmin, employeeInfo });
             console.log("네비게이션 렌더링 시작 - 직원 정보:", employeeInfo ? '있음' : '없음');
             
-            // 카테고리별로 데이터 분류
             const categories = {};
             
-            // 먼저 카테고리 분류
             data.forEach(item => {
-                // 직원 정보가 있는 경우 필터링 적용 (모든 계정에 적용)
                 if (employeeInfo) {
-                    // employeeInfo가 배열인 경우 (한 직원이 여러 권한을 가질 수 있음)
                     const employeePermissions = Array.isArray(employeeInfo) ? employeeInfo : [employeeInfo];
                     
-                    // 직원의 권한 중 하나라도 일치하는지 확인
                     const hasPermission = employeePermissions.some(permission => {
-                        // 카테고리순서가 일치하는 항목만 포함
                         if (permission.카테고리순서 && item.카테고리순서 !== permission.카테고리순서) {
                             return false;
                         }
                         
-                        // 업무구분이 일치하는 항목만 포함
                         if (permission.업무구분 && item.업무구분 !== permission.업무구분) {
                             return false;
                         }
@@ -408,53 +341,38 @@
                 categories[item.카테고리].items.push(item);
             });
             
-            // 카테고리 순서로 정렬
             const sortedCategories = Object.entries(categories).sort((a, b) => {
-                // 카테고리순서가 문자열이므로 문자열 비교로 정렬
                 return a[1].order.localeCompare(b[1].order);
             });
 
-            // 각 카테고리별 섹션 생성
             sortedCategories.forEach(([categoryName, categoryData]) => {
-                // 카테고리 내 아이템들을 정렬
                 categoryData.items.sort((a, b) => {
-                    // 아이템순서 필드 확인 (여러 가능한 필드명 확인)
                     const aOrder = a.아이템순서 || a.메뉴순서 || a.카테고리순서;
                     const bOrder = b.아이템순서 || b.메뉴순서 || b.카테고리순서;
                     
-                    // 순서 필드가 있으면 문자열 비교로 정렬
                     if (aOrder && bOrder) {
                         return aOrder.localeCompare(bOrder);
                     }
                     
-                    // 순서 필드가 없으면 업무구분으로 정렬
                     return a.업무구분.localeCompare(b.업무구분);
                 });
                 
-                // 카테고리 섹션 생성
                 const categorySection = document.createElement('div');
                 categorySection.className = 'category-section';
 
-                // 카테고리 제목 생성
                 const categoryTitle = document.createElement('h2');
                 categoryTitle.className = 'category-title';
                 categoryTitle.textContent = categoryName;
                 categorySection.appendChild(categoryTitle);
 
-                // 버튼 그리드 생성
                 const buttonGrid = document.createElement('div');
                 buttonGrid.className = 'button-grid';
 
-                // 각 메뉴 항목 생성
                 categoryData.items.forEach(item => {
-                    // 직원 정보가 있는 경우 추가 필터링 적용 (모든 계정에 적용)
                     if (employeeInfo) {
-                        // employeeInfo가 배열인 경우 (한 직원이 여러 권한을 가질 수 있음)
                         const employeePermissions = Array.isArray(employeeInfo) ? employeeInfo : [employeeInfo];
                         
-                        // 직원의 권한 중 하나라도 연결주소가 일치하는지 확인
                         const hasMatchingUrl = employeePermissions.some(permission => {
-                            // 연결주소가 일치하는 항목만 포함 (선택적)
                             if (permission.연결주소 && item.연결주소 !== permission.연결주소) {
                                 return false;
                             }
@@ -467,31 +385,23 @@
                         }
                     }
                     
-                    // 관리자 전용 메뉴 항목 필터링 (employees_approach 테이블의 권한에 따라 결정)
-                    // 이제 모든 계정이 employees_approach 테이블의 권한에 따라 필터링되므로 별도 처리 불필요
-                    
                     const navButton = document.createElement('a');
 
-                    // URL이 비어있거나 "준비중"인지 확인
                     let url = item.연결주소;
                     const isPending = !url || url.trim() === '' || url.toLowerCase() === '준비중';
 
                     if (isPending) {
-                        // 준비중인 메뉴는 href 속성 대신 클릭 이벤트를 사용
                         navButton.href = 'javascript:void(0)';
                         navButton.addEventListener('click', function (e) {
                             e.preventDefault();
                             window.showAlert('해당 메뉴는 현재 준비 중입니다.');
                         });
                     } else {
-                        // URL이 null이 아닌 경우에만 처리
                         if (url) {
-                            // URL이 http:// 또는 https://로 시작하지 않으면 https:// 추가
                             if (!url.match(/^https?:\/\//i)) {
                                 url = 'https://' + url;
                             }
 
-                            //"from=index" 쿼리 추가
                             if (url.includes('?')) {
                                 url += '&from=index';
                             } else {
@@ -499,9 +409,8 @@
                             }
                             
                             navButton.href = url;
-                            navButton.target = "_blank"; // 새 탭에서 열기
+                            navButton.target = "_blank";
                         } else {
-                            // URL이 null인 경우 기본값 설정
                             navButton.href = 'javascript:void(0)';
                             navButton.addEventListener('click', function (e) {
                                 e.preventDefault();
@@ -512,7 +421,6 @@
 
                     navButton.className = 'nav-button';
 
-                    // 메뉴 이름 생성 (커스텀 밑줄 스타일)
                     const span = document.createElement('span');
                     span.textContent = item.업무구분;
                     span.className = 'nav-text';
@@ -525,35 +433,28 @@
                 navContainer.appendChild(categorySection);
             });
 
-            // 로딩 화면 숨기기
             document.getElementById('loading').style.display = 'none';
         }
 
-        // 오류 처리 함수
         function handleError(error) {
             console.error('오류 발생:', error);
             document.getElementById('loading').style.display = 'none';
             window.showAlert('메뉴를 불러오는 중 오류가 발생했습니다: ' + error);
         }
 
-        // 이메일에서 직원번호 추출하는 함수
         function extractEmployeeId(email) {
             return email.split('@')[0];
         }
         
-        // 로그인된 사용자 정보 업데이트
         function updateUserInfo(email) {
-            // 이메일에서 직원번호 추출 (example@example.com에서 example 부분)
             const employeeId = extractEmployeeId(email);
             
-            // admin 계정인 경우 표시방식 변경
             if (employeeId.toLowerCase() === 'admin') {
                 document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-shield"></i>관리자 님`;
                 return;
             }
             
 
-            // 첫 글자를 대문자로 변환하여 표시
             const displayId = employeeId.charAt(0).toUpperCase() + employeeId.slice(1);
             document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-check"></i>${displayId} 님`;
         }
