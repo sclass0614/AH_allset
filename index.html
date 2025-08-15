@@ -99,13 +99,6 @@
 
         <div class="footer">
             © 2025 우리집 데이케어 센터. All rights reserved.
-            
-            <!-- 임시 테스트용 노트 앱 버튼 -->
-            <div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-                <strong>노트 앱 테스트:</strong>
-                <button onclick="openNoteApp()" style="margin-left: 10px; padding: 5px 10px;">노트 앱 열기</button>
-                <button onclick="testSessionStorage()" style="margin-left: 5px; padding: 5px 10px;">SessionStorage 확인</button>
-            </div>
         </div>
     </div>
 
@@ -583,23 +576,7 @@
             return null;
         }
         
-        // 테스트용 함수들
-        function testSessionStorage() {
-            const empNo = getCurrentEmployeeId();
-            console.log('=== SessionStorage 테스트 ===');
-            console.log('현재 로그인 상태:', document.getElementById('loginBtn').getAttribute('data-logged-in'));
-            console.log('현재 직원번호:', empNo);
-            console.log('sessionStorage currentUser:', sessionStorage.getItem('currentUser'));
-            console.log('sessionStorage userInfo:', sessionStorage.getItem('userInfo'));
-            console.log('sessionStorage empNo:', sessionStorage.getItem('empNo'));
-            
-            if (empNo) {
-                setUserInfoForNoteApp(empNo);
-                alert('SessionStorage에 사용자 정보가 저장되었습니다: ' + empNo);
-            } else {
-                alert('로그인이 필요합니다.');
-            }
-        }
+
     </script>
 </body>
 
