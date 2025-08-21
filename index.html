@@ -442,28 +442,23 @@
                             // 특정 사이트에만 직원번호 전달 여부 확인
                             const shouldPassEmployeeId = EMPLOYEE_ID_TARGET_SITES.some(site => url.includes(site));
                             
+                            // URL에는 기본 파라미터만 추가 (직원번호는 sessionStorage로 전달)
                             if (url.includes('?')) {
                                 url += '&from=index';
-                                if (currentEmpNo && shouldPassEmployeeId) {
-                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
-                                }
                             } else {
                                 url += '?from=index';
-                                if (currentEmpNo && shouldPassEmployeeId) {
-                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
-                                }
                             }
                             
                             navButton.href = url;
                             navButton.target = "_blank";
                             
-                            // 노트 앱 관련 링크인 경우 sessionStorage에 사용자 정보 저장
+                            // 특정 사이트로 이동할 때 sessionStorage에 사용자 정보 저장
                             if (shouldPassEmployeeId) {
                                 navButton.addEventListener('click', function(e) {
                                     const empNo = getCurrentEmployeeId();
                                     if (empNo) {
                                         setUserInfoForNoteApp(empNo);
-                                        console.log('노트 앱 열기 전 사용자 정보 저장:', empNo);
+                                        console.log('새 창용 사용자 정보 저장 완료:', empNo);
                                     }
                                 });
                             }
