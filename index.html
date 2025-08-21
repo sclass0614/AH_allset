@@ -442,17 +442,23 @@
                             // 특정 사이트에만 직원번호 전달 여부 확인
                             const shouldPassEmployeeId = EMPLOYEE_ID_TARGET_SITES.some(site => url.includes(site));
                             
-                            // URL에는 기본 파라미터만 추가 (직원번호는 sessionStorage로 전달)
+                            // URL에 직원번호 파라미터 추가
                             if (url.includes('?')) {
                                 url += '&from=index';
+                                if (currentEmpNo && shouldPassEmployeeId) {
+                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
+                                }
                             } else {
                                 url += '?from=index';
+                                if (currentEmpNo && shouldPassEmployeeId) {
+                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
+                                }
                             }
                             
                             navButton.href = url;
                             navButton.target = "_blank";
                             
-                            // 특정 사이트로 이동할 때 sessionStorage에 사용자 정보 저장
+                            // 특정 사이트로 이동할 때 sessionStorage에도 사용자 정보 저장 (백업용)
                             if (shouldPassEmployeeId) {
                                 navButton.addEventListener('click', function(e) {
                                     const empNo = getCurrentEmployeeId();
