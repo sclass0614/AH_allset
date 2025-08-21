@@ -1,0 +1,120 @@
+직원번호를 새창으로 넘기는 코드 정리
+=====================================
+
+1. 직원번호 추출 함수
+---------------------
+function getCurrentEmployeeId() {
+    const userInfoText = document.getElementById('userInfo').textContent;
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (loginBtn.getAttribute('data-logged-in') === 'true') {
+        // userInfo에서 직원번호 추출 (예: "S25001 님" -> "S25001")
+        const match = userInfoText.match(/([A-Za-z0-9]+)\s*님/);
+        return match ? match[1].toLowerCase() : null;
+    }
+    
+    return null;
+}
+
+2. URL에 직원번호 파라미터 추가하는 코드
+---------------------------------------
+// 현재 로그인된 직원번호 가져오기
+const currentEmpNo = getCurrentEmployeeId();
+
+if (url.includes('?')) {
+    url += '&from=index';
+    if (currentEmpNo) {
+        url += '&empNo=' + encodeURIComponent(currentEmpNo);
+    }
+} else {
+    url += '?from=index';
+    if (currentEmpNo) {
+        url += '&empNo=' + encodeURIComponent(currentEmpNo);
+    }
+}
+
+navButton.href = url;
+navButton.target = "_blank";
+
+3. 노트 앱 전용 함수
+-------------------
+function openNoteApp(empNo = null) {
+    const employeeId = empNo || getCurrentEmployeeId();
+    if (!employeeId) {
+        window.showAlert('로그인이 필요합니다.');
+        return;
+    }
+    
+    // sessionStorage에 사용자 정보 저장
+    setUserInfoForNoteApp(employeeId);
+    
+    // 노트 앱 열기 (URL 파라미터도 함께 전달)
+    const noteAppUrl = `./index.html?empNo=${encodeURIComponent(employeeId)}`;
+    window.open(noteAppUrl, '_blank');
+}
+
+4. PostMessage를 통한 통신
+-------------------------
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'requestUserInfo') {
+        const currentUserEmpNo = getCurrentEmployeeId();
+        if (currentUserEmpNo) {
+            event.source.postMessage({
+                type: 'userInfo',
+                userId: currentUserEmpNo,
+                empNo: currentUserEmpNo,
+                user: currentUserEmpNo
+            }, '*');
+            console.log('PostMessage로 직원번호 전송:', currentUserEmpNo);
+        }
+    }
+});
+
+5. 사용자 정보 저장 함수
+-----------------------
+function setUserInfoForNoteApp(empNo) {
+    try {
+        // 방법 1: sessionStorage에 저장 (가장 안정적)
+        sessionStorage.setItem('currentUser', empNo);
+        sessionStorage.setItem('userInfo', empNo);
+        sessionStorage.setItem('empNo', empNo);
+        
+        // 방법 2: userInfo 요소에 설정 (노트 앱이 같은 페이지에 있는 경우)
+        const userInfoElement = document.getElementById('userInfo');
+        if (userInfoElement) {
+            userInfoElement.setAttribute('data-emp-no', empNo);
+        }
+        
+        console.log('노트 앱용 사용자 정보 설정 완료:', empNo);
+    } catch (error) {
+        console.error('사용자 정보 설정 오류:', error);
+    }
+}
+
+6. 사용자 정보 정리 함수
+-----------------------
+function clearUserInfoForNoteApp() {
+    try {
+        // sessionStorage 정리
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('userInfo');
+        sessionStorage.removeItem('empNo');
+        
+        // userInfo 요소에서 data-emp-no 속성 제거
+        const userInfoElement = document.getElementById('userInfo');
+        if (userInfoElement) {
+            userInfoElement.removeAttribute('data-emp-no');
+        }
+        
+        console.log('노트 앱용 사용자 정보 정리 완료');
+    } catch (error) {
+        console.error('사용자 정보 정리 오류:', error);
+    }
+}
+
+사용 방법:
+---------
+1. URL 파라미터로 전달: 링크 클릭 시 자동으로 empNo 파라미터가 추가됨
+2. PostMessage로 전달: 다른 창에서 'requestUserInfo' 메시지를 보내면 응답
+3. sessionStorage로 전달: 같은 도메인의 다른 페이지에서 sessionStorage.getItem('empNo')로 접근
+4. 직접 함수 호출: openNoteApp() 함수를 호출하여 노트 앱 열기
