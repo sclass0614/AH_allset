@@ -478,4 +478,11 @@ textarea {
     .header {
         height: 3.5rem;
     }
+
+    @media (max-width: 480px) {
+        .a4-paper {
+            transform: scale(0.6);
+        }
+    }
+    
 }
