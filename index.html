@@ -1,605 +1,132 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>우리집 데이케어 센터 통합 관리 시스템</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="style.css">
-    
-    <script src="supabase.js"></script>
-    
-    <script type="module">
-        import { checkSession, login, logout } from './auth-module.js';
-        
-        window.auth = { login, logout };
-        
-        window.showAlert = function(message) {
-            const modal = document.getElementById('customModal');
-            const messageEl = document.getElementById('modalMessage');
-            messageEl.textContent = message;
-            
-            document.getElementById('loading').style.display = 'none';
-            
-            modal.style.display = 'flex';
-        };
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                document.getElementById('loading').style.display = 'flex';
-                
-                const { session, error } = await checkSession();
-                
-                if (session) {
-                    console.log('로그인된 사용자:', session.user.email);
-                    document.getElementById('loginBtn').textContent = '로그아웃';
-                    document.getElementById('loginBtn').setAttribute('data-logged-in', 'true');
-                    
-                    updateUserInfo(session.user.email);
-                    
-                    const employeeId = extractEmployeeId(session.user.email);
-                    await window.loadNavigationData(employeeId);
-                } else {
-                    document.getElementById('nav-container').style.display = 'none';
-                    document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
-                    
-                    setTimeout(() => {
-                        document.getElementById('loginModal').style.display = 'flex';
-                        document.getElementById('employeeId').focus();
-                    }, 500);
-                }
-            } catch (err) {
-                console.error('초기화 오류:', err);
-                showAlert('시스템 초기화 중 오류가 발생했습니다.');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
-        });
-    </script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리집 통합관리시스템 - 페이지 이동</title>
     <style>
-        .user-section {
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-info {
-            color: var(--main-color);
-            font-size: 0.95rem;
-            font-weight: 500;
-            display: flex;
+            justify-content: center;
             align-items: center;
         }
-
-        .user-info i {
-            margin-right: 0.5rem;
-            color: var(--accent-color);
+        
+        .message-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .new-url {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .countdown {
+            color: #666;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.1s linear;
         }
     </style>
 </head>
-
 <body>
-    <div id="loading" class="loading">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <div class="container">
-        <div class="header">
-            <div class="title">우리집 데이케어센터 통합관리시스템</div>
-            <div class="user-section">
-                <span id="userInfo" class="user-info">로그인이 필요합니다</span>
-                <button id="loginBtn" class="login-header-btn">로그인</button>
-            </div>
+    <div class="message-container">
+        <div class="icon">🏠</div>
+        <h1>우리집 통합관리시스템은<br>ahworkstation.netlify.app으로<br>이관되었습니다.</h1>
+        <div class="new-url">ahworkstation.netlify.app</div>
+        <p style="color: #666; margin-bottom: 0;">새로운 주소로 업무를 진행하세요.</p>
+        <div class="countdown">
+            <span id="countdown">2</span>초 후 자동으로 이동됩니다...
         </div>
-
-        <div id="nav-container" class="nav-container">
-        </div>
-
-        <div class="footer">
-            © 2025 우리집 데이케어 센터. All rights reserved.
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="customModal" style="z-index: 1100;">
-        <div class="modal-container">
-            <div class="modal-header">
-                <div class="modal-title">알림</div>
-                <div class="modal-close">&times;</div>
-            </div>
-            <div class="modal-body" id="modalMessage">
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn" id="modalConfirmBtn">확인</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="loginModal" style="z-index: 1000;">
-        <div class="login-modal-container">
-            <div class="login-modal-header">
-                <div class="login-modal-title">로그인</div>
-                <div class="login-modal-subtitle">우리집 데이케어센터 통합관리시스템</div>
-                <div class="login-modal-close" id="loginModalClose">&times;</div>
-            </div>
-            <div class="login-modal-form">
-                <div class="form-group">
-                    <label for="employeeId">직원번호</label>
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="employeeId" placeholder="직원번호를 입력하세요" autocomplete="off">
-                </div>
-                <div class="form-group">
-                    <label for="password">비밀번호</label>
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="비밀번호를 입력하세요">
-                </div>
-                <button type="button" class="login-btn" id="submitLoginBtn">로그인</button>
-            </div>
-            <div class="login-modal-footer">
-                로그인 문제가 있으시면 관리자에게 문의하세요
-            </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
         </div>
     </div>
 
     <script>
-        // 노트 앱에서 사용자 정보 요청 시 응답하는 PostMessage 리스너
-        window.addEventListener('message', function(event) {
-            // 보안을 위해 origin 체크 (필요시 특정 도메인으로 제한)
-            // if (event.origin !== 'https://yourdomain.com') return;
+        // 페이지 로딩 시 즉시 실행
+        let countdown = 2;
+        const countdownElement = document.getElementById('countdown');
+        const progressBar = document.getElementById('progressBar');
+        
+        // 진행률 바 초기화
+        progressBar.style.width = '0%';
+        
+        // 카운트다운 및 진행률 바 업데이트
+        const timer = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
             
-            if (event.data && event.data.type === 'requestUserInfo') {
-                const currentUserEmpNo = getCurrentEmployeeId();
-                if (currentUserEmpNo) {
-                    event.source.postMessage({
-                        type: 'userInfo',
-                        userId: currentUserEmpNo,
-                        empNo: currentUserEmpNo,
-                        user: currentUserEmpNo
-                    }, '*');
-                    console.log('PostMessage로 직원번호 전송:', currentUserEmpNo);
-                } else {
-                    console.log('로그인된 사용자가 없어서 PostMessage 응답 불가');
-                }
+            // 진행률 바 업데이트 (2초에서 0초까지)
+            const progress = ((2 - countdown) / 2) * 100;
+            progressBar.style.width = progress + '%';
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                // 새로운 주소로 리다이렉트
+                window.location.href = 'https://ahworkstation.netlify.app';
             }
+        }, 1000);
+        
+        // 사용자가 클릭하면 즉시 이동
+        document.addEventListener('click', () => {
+            clearInterval(timer);
+            window.location.href = 'https://ahworkstation.netlify.app';
         });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('customModal');
-            const closeBtn = modal.querySelector('.modal-close');
-            const confirmBtn = document.getElementById('modalConfirmBtn');
-
-            closeBtn.addEventListener('click', function () {
-                modal.style.display = 'none';
-            });
-
-            confirmBtn.addEventListener('click', function () {
-                modal.style.display = 'none';
-            });
-
-            window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-
-            const loginBtn = document.getElementById('loginBtn');
-            const loginModal = document.getElementById('loginModal');
-            const loginModalClose = document.getElementById('loginModalClose');
-            const submitLoginBtn = document.getElementById('submitLoginBtn');
-            const employeeIdInput = document.getElementById('employeeId');
-            const passwordInput = document.getElementById('password');
-
-            loginModalClose.addEventListener('click', function() {
-                loginModal.style.display = 'none';
-            });
-
-            window.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && loginModal.style.display === 'flex') {
-                    loginModal.style.display = 'none';
-                }
-            });
-
-            loginBtn.addEventListener('click', async function() {
-                if (loginBtn.getAttribute('data-logged-in') === 'true') {
-                    document.getElementById('loading').style.display = 'flex';
-                    
-                    const { error } = await window.auth.logout();
-                    
-                    if (error) {
-                        window.showAlert('로그아웃 중 오류가 발생했습니다.');
-                        return;
-                    }
-                    
-                    loginBtn.textContent = '로그인';
-                    loginBtn.removeAttribute('data-logged-in');
-                    
-                    document.getElementById('userInfo').innerHTML = '<i class="fas fa-user-lock"></i>로그인이 필요합니다';
-                    
-                    // 노트 앱용 사용자 정보도 정리
-                    clearUserInfoForNoteApp();
-                    
-                    document.getElementById('nav-container').style.display = 'none';
-                    document.getElementById('nav-container').innerHTML = '';
-                    
-                    loginModal.style.display = 'flex';
-                    employeeIdInput.focus();
-                    
-                    console.log('로그아웃 시 직원 정보 및 네비게이션 초기화 완료');
-                    window.showAlert('로그아웃되었습니다.');
-                } else {
-                    loginModal.style.display = 'flex';
-                    employeeIdInput.focus();
-                }
-            });
-
-            submitLoginBtn.addEventListener('click', async function() {
-                document.getElementById('loading').style.display = 'flex';
-                
-                const employeeId = employeeIdInput.value.trim();
-                const password = passwordInput.value;
-                
-                try {
-                    const { user, error } = await window.auth.login(employeeId, password);
-                    
-                    if (error) {
-                        let errorMessage = error.message || '로그인에 실패했습니다.';
-                        if (errorMessage === 'Invalid login credentials') {
-                            errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
-                        }
-                        window.showAlert(errorMessage);
-                        return;
-                    }
-                    
-                    loginModal.style.display = 'none';
-                    loginBtn.textContent = '로그아웃';
-                    loginBtn.setAttribute('data-logged-in', 'true');
-                    
-                    updateUserInfo(user.email);
-                    
-                    document.getElementById('nav-container').style.display = 'flex';
-                    
-                    const extractedEmployeeId = extractEmployeeId(user.email);
-                    await window.loadNavigationData(extractedEmployeeId);
-                    
-                    window.showAlert('로그인에 성공했습니다!');
-                    
-                    employeeIdInput.value = '';
-                    passwordInput.value = '';
-                } catch (err) {
-                    console.error('로그인 처리 오류:', err);
-                    window.showAlert('로그인 중 오류가 발생했습니다.');
-                }
-            });
-
-            passwordInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    window.auth.login();
-                }
-            });
-        });
-
-        // 직원번호를 전달할 특정 사이트 목록
-        const EMPLOYEE_ID_TARGET_SITES = [
-            'https://sclass0614.github.io/AH_noteshare/',
-            'https://sclass0614.github.io/AH_noteshare_mobile/',
-            'https://sclass0614.github.io/AH_management_note_total',
-            'https://sclass0614.github.io/AH_management_note_individual',
-            'https://sclass0614.github.io/AH_management_note_admin',
-            'https://sclass0614.github.io/AH_management_note_upgrade',
-            'AH_management_note_individual',
-            'AH_noteshare',
-            'AH_noteshare_mobile',
-            'AH_management_note_total',
-            'AH_management_note_individual',
-            'AH_management_note_admin',        
-            'AH_management_note_upgrade',
-            // 'AH_management_note_total'
-        ];
-
-        window.loadNavigationData = async function(employeeId = null) {
-            try {
-                let employeeInfo = null;
-                
-                if (employeeId) {
-                    console.log('직원 정보 조회 시작:', employeeId);
-                    console.log('이전 직원 정보 초기화됨');
-                    
-                    let accessToken = null;
-                    try {
-                        const { data: { session } } = await window.authClient?.auth.getSession();
-                        if (session) {
-                            accessToken = session.access_token;
-                            console.log('액세스 토큰 획득:', accessToken ? '성공' : '실패');
-                        }
-                    } catch (error) {
-                        console.log('액세스 토큰 획득 실패:', error);
-                    }
-                    
-                    const employeeResult = await supabase.getEmployeeApproach(employeeId, accessToken);
-                    
-                    if (!employeeResult.success) {
-                        throw new Error(employeeResult.error);
-                    }
-                    
-                    employeeInfo = employeeResult.data;
-                    console.log('새로 조회된 직원 정보:', employeeInfo);
-                } else {
-                    console.log('직원번호가 제공되지 않음 - 직원 정보 없음');
-                }
-                
-                const result = await supabase.getNavigationData(employeeInfo);
-                
-                if (!result.success) {
-                    throw new Error(result.error);
-                }
-                
-                renderNavigationFromRawData(result.data, employeeInfo);
-            } catch (error) {
-                handleError(error.message);
-            }
-        };
-
-        function renderNavigationFromRawData(data, employeeInfo = null) {
-            const navContainer = document.getElementById('nav-container');
-            navContainer.innerHTML = '';
-
-            const userInfo = document.getElementById('userInfo').textContent;
-            const isAdmin = false;
-            const isPublic = false;
-            
-            console.log("현재 로그인 상태:", { userInfo, isAdmin, employeeInfo });
-            console.log("네비게이션 렌더링 시작 - 직원 정보:", employeeInfo ? '있음' : '없음');
-            
-            const categories = {};
-            
-            data.forEach(item => {
-                if (employeeInfo) {
-                    const employeePermissions = Array.isArray(employeeInfo) ? employeeInfo : [employeeInfo];
-                    
-                    const hasPermission = employeePermissions.some(permission => {
-                        if (permission.카테고리순서 && item.카테고리순서 !== permission.카테고리순서) {
-                            return false;
-                        }
-                        
-                        if (permission.업무구분 && item.업무구분 !== permission.업무구분) {
-                            return false;
-                        }
-                        
-                        return true;
-                    });
-                    
-                    if (!hasPermission) {
-                        return;
-                    }
-                }
-                
-                if (!categories[item.카테고리]) {
-                    categories[item.카테고리] = {
-                        items: [],
-                        order: item.카테고리순서
-                    };
-                }
-                categories[item.카테고리].items.push(item);
-            });
-            
-            const sortedCategories = Object.entries(categories).sort((a, b) => {
-                return a[1].order.localeCompare(b[1].order);
-            });
-
-            sortedCategories.forEach(([categoryName, categoryData]) => {
-                categoryData.items.sort((a, b) => {
-                    const aOrder = a.아이템순서 || a.메뉴순서 || a.카테고리순서;
-                    const bOrder = b.아이템순서 || b.메뉴순서 || b.카테고리순서;
-                    
-                    if (aOrder && bOrder) {
-                        return aOrder.localeCompare(bOrder);
-                    }
-                    
-                    return a.업무구분.localeCompare(b.업무구분);
-                });
-                
-                const categorySection = document.createElement('div');
-                categorySection.className = 'category-section';
-
-                const categoryTitle = document.createElement('h2');
-                categoryTitle.className = 'category-title';
-                categoryTitle.textContent = categoryName;
-                categorySection.appendChild(categoryTitle);
-
-                const buttonGrid = document.createElement('div');
-                buttonGrid.className = 'button-grid';
-
-                categoryData.items.forEach(item => {
-                    if (employeeInfo) {
-                        const employeePermissions = Array.isArray(employeeInfo) ? employeeInfo : [employeeInfo];
-                        
-                        const hasMatchingUrl = employeePermissions.some(permission => {
-                            if (permission.연결주소 && item.연결주소 !== permission.연결주소) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        
-                        if (!hasMatchingUrl) {
-                            console.log("연결주소 불일치로 필터링됨:", item.연결주소);
-                            return;
-                        }
-                    }
-                    
-                    const navButton = document.createElement('a');
-
-                    let url = item.연결주소;
-                    const isPending = !url || url.trim() === '' || url.toLowerCase() === '준비중';
-
-                    if (isPending) {
-                        navButton.href = 'javascript:void(0)';
-                        navButton.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            window.showAlert('해당 메뉴는 현재 준비 중입니다.');
-                        });
-                    } else {
-                        if (url) {
-                            if (!url.match(/^https?:\/\//i)) {
-                                url = 'https://' + url;
-                            }
-
-                            // 현재 로그인된 직원번호 가져오기
-                            const currentEmpNo = getCurrentEmployeeId();
-                            
-                            // 특정 사이트에만 직원번호 전달 여부 확인
-                            const shouldPassEmployeeId = EMPLOYEE_ID_TARGET_SITES.some(site => url.includes(site));
-                            
-                            // URL에 직원번호 파라미터 추가
-                            if (url.includes('?')) {
-                                url += '&from=index';
-                                if (currentEmpNo && shouldPassEmployeeId) {
-                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
-                                }
-                            } else {
-                                url += '?from=index';
-                                if (currentEmpNo && shouldPassEmployeeId) {
-                                    url += '&empNo=' + encodeURIComponent(currentEmpNo);
-                                }
-                            }
-                            
-                            navButton.href = url;
-                            navButton.target = "_blank";
-                            
-                            // 특정 사이트로 이동할 때 sessionStorage에도 사용자 정보 저장 (백업용)
-                            if (shouldPassEmployeeId) {
-                                navButton.addEventListener('click', function(e) {
-                                    const empNo = getCurrentEmployeeId();
-                                    if (empNo) {
-                                        setUserInfoForNoteApp(empNo);
-                                        console.log('새 창용 사용자 정보 저장 완료:', empNo);
-                                    }
-                                });
-                            }
-                        } else {
-                            navButton.href = 'javascript:void(0)';
-                            navButton.addEventListener('click', function (e) {
-                                e.preventDefault();
-                                window.showAlert('링크 정보가 없습니다.');
-                            });
-                        }
-                    }
-
-                    navButton.className = 'nav-button';
-
-                    const span = document.createElement('span');
-                    span.textContent = item.업무구분;
-                    span.className = 'nav-text';
-                    navButton.appendChild(span);
-
-                    buttonGrid.appendChild(navButton);
-                });
-
-                categorySection.appendChild(buttonGrid);
-                navContainer.appendChild(categorySection);
-            });
-
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function handleError(error) {
-            console.error('오류 발생:', error);
-            document.getElementById('loading').style.display = 'none';
-            window.showAlert('메뉴를 불러오는 중 오류가 발생했습니다: ' + error);
-        }
-
-        function extractEmployeeId(email) {
-            return email.split('@')[0];
-        }
-        
-        function updateUserInfo(email) {
-            const employeeId = extractEmployeeId(email);
-            
-            // 노트 앱을 위한 사용자 정보 저장
-            setUserInfoForNoteApp(employeeId);
-            
-            if (employeeId.toLowerCase() === 'admin') {
-                document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-shield"></i>관리자 님`;
-                return;
-            }
-            
-
-            const displayId = employeeId.charAt(0).toUpperCase() + employeeId.slice(1);
-            document.getElementById('userInfo').innerHTML = `<i class="fas fa-user-check"></i>${displayId} 님`;
-        }
-        
-        // 노트 앱을 위한 사용자 정보 설정 함수들
-        function setUserInfoForNoteApp(empNo) {
-            try {
-                // 방법 1: sessionStorage에 저장 (가장 안정적)
-                sessionStorage.setItem('currentUser', empNo);
-                sessionStorage.setItem('userInfo', empNo);
-                sessionStorage.setItem('empNo', empNo);
-                
-                // 방법 2: userInfo 요소에 설정 (노트 앱이 같은 페이지에 있는 경우)
-                const userInfoElement = document.getElementById('userInfo');
-                if (userInfoElement) {
-                    userInfoElement.setAttribute('data-emp-no', empNo);
-                }
-                
-                console.log('노트 앱용 사용자 정보 설정 완료:', empNo);
-            } catch (error) {
-                console.error('사용자 정보 설정 오류:', error);
-            }
-        }
-        
-        // 노트 앱용 사용자 정보 정리
-        function clearUserInfoForNoteApp() {
-            try {
-                // sessionStorage 정리
-                sessionStorage.removeItem('currentUser');
-                sessionStorage.removeItem('userInfo');
-                sessionStorage.removeItem('empNo');
-                
-                // userInfo 요소에서 data-emp-no 속성 제거
-                const userInfoElement = document.getElementById('userInfo');
-                if (userInfoElement) {
-                    userInfoElement.removeAttribute('data-emp-no');
-                }
-                
-                console.log('노트 앱용 사용자 정보 정리 완료');
-            } catch (error) {
-                console.error('사용자 정보 정리 오류:', error);
-            }
-        }
-        
-        // 노트 앱으로 이동하는 함수 (필요 시 사용)
-        function openNoteApp(empNo = null) {
-            const employeeId = empNo || getCurrentEmployeeId();
-            if (!employeeId) {
-                window.showAlert('로그인이 필요합니다.');
-                return;
-            }
-            
-            // sessionStorage에 사용자 정보 저장
-            setUserInfoForNoteApp(employeeId);
-            
-            // 노트 앱 열기 (URL 파라미터도 함께 전달)
-            const noteAppUrl = `./index.html?empNo=${encodeURIComponent(employeeId)}`;
-            window.open(noteAppUrl, '_blank');
-        }
-        
-        // 현재 로그인된 직원번호 가져오기
-        function getCurrentEmployeeId() {
-            const userInfoText = document.getElementById('userInfo').textContent;
-            const loginBtn = document.getElementById('loginBtn');
-            
-            if (loginBtn.getAttribute('data-logged-in') === 'true') {
-                // userInfo에서 직원번호 추출 (예: "S25001 님" -> "S25001")
-                const match = userInfoText.match(/([A-Za-z0-9]+)\s*님/);
-                return match ? match[1].toLowerCase() : null;
-            }
-            
-            return null;
-        }
-        
-
     </script>
 </body>
-
 </html>
